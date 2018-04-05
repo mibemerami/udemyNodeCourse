@@ -1,6 +1,7 @@
 const http = require("http");
 const url = require("url");
 const StringDecoder = require("string_decoder").StringDecoder;
+const config = require("./config");
 
 let server = http.createServer((request, response) => {
   // Extract data:
@@ -53,8 +54,14 @@ let server = http.createServer((request, response) => {
   };
 });
 
-server.listen(3000, () => {
-  console.log("The Server is listening on port 3000 now.");
+server.listen(config.httpPort, () => {
+  console.log(
+    "The Server is listening on port " +
+      config.httpPort +
+      " now, in " +
+      config.env +
+      "."
+  );
 });
 
 let handlers = {};
