@@ -2,8 +2,11 @@ const http = require("http");
 const url = require("url");
 const StringDecoder = require("string_decoder").StringDecoder;
 const config = require("./config");
+const https = require("https");
+const fs = require("fs");
 
-let server = http.createServer((request, response) => {
+// Extract request data and call handlers to responde
+let defineServerFunctionality = function(request, response) {
   // Extract data:
   const parsedUrl = url.parse(request.url, true);
   const method = request.method.toLowerCase();
@@ -52,18 +55,44 @@ let server = http.createServer((request, response) => {
     console.log("Request received with query-string:", queryStringObject);
     console.log("Request received with payload:", buffer);
   };
-});
+};
 
-server.listen(config.httpPort, () => {
+// Start server
+// http:
+let httpServer = http.createServer((request, response) => {
+  defineServerFunctionality(request, response);
+});
+httpServer.listen(config.httpPort, () => {
   console.log(
     "The Server is listening on port " +
       config.httpPort +
       " now, in " +
-      config.env +
+      config.envName +
+      "."
+  );
+});
+//https:
+const httpsServerOptions = {
+  key: fs.readFileSync("./https/key.pem"),
+  cert: fs.readFileSync("./https/cert.pem")
+};
+let httpsServer = https.createServer(
+  httpsServerOptions,
+  (request, response) => {
+    defineServerFunctionality(request, response);
+  }
+);
+httpsServer.listen(config.httpsPort, () => {
+  console.log(
+    "The Server is listening on port " +
+      config.httpsPort +
+      " now, in " +
+      config.envName +
       "."
   );
 });
 
+// Define respopnses with handlers and a router
 let handlers = {};
 handlers.sample = function(data, callback) {
   callback(406, { name: "Sample handler" });
