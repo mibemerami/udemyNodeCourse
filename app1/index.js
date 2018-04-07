@@ -97,9 +97,13 @@ let handlers = {};
 handlers.sample = function(data, callback) {
   callback(406, { name: "Sample handler" });
 };
+handlers.ping = function(data, callback) {
+  callback(200);
+};
 handlers.notFound = function(data, callback) {
   callback(404);
 };
 const router = {
-  sample: handlers.sample
+  sample: handlers.sample,
+  ping: handlers.ping
 };

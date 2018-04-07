@@ -2,7 +2,7 @@
 A node based server with REST API.
 
 Start is like this:
-ENV_DATA=staging node Myindex.js
+ENV_DATA=staging node index.js
 
 Configuration Options can be defined in the file
 config.js
