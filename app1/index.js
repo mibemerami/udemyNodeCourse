@@ -5,6 +5,12 @@ const config = require("./config");
 const https = require("https");
 const fs = require("fs");
 
+// Test:
+const _data = require("./lib/data");
+_data.create("test", "tttFile", { foo: "bar" }, err => {
+  console.log("Possible error: ", err);
+});
+
 // Extract request data and call handlers to responde
 let defineServerFunctionality = function(request, response) {
   // Extract data:
