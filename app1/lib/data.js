@@ -30,5 +30,47 @@ lib.create = function(dir, file, data, callback) {
     }
   );
 };
+lib.read = function(dir, file, callback) {
+  fs.readFile(lib.baseDir + dir + "/" + file + ".json", "utf8", (err, data) => {
+    callback(err, data);
+  });
+};
+lib.update = function(dir, file, data, callback) {
+  fs.open(
+    lib.baseDir + dir + "/" + file + ".json",
+    "r+",
+    (err, filedescriptor) => {
+      let jsonData = JSON.stringify(data);
+      fs.truncate(filedescriptor, err => {
+        if (!err) {
+          fs.writeFile(filedescriptor, jsonData, err => {
+            if (!err) {
+              fs.close(filedescriptor, err => {
+                if (!err) {
+                  callback(false);
+                } else {
+                  callback("Error while closing the file.");
+                }
+              });
+            } else {
+              callback("Error while writing data to file.");
+            }
+          });
+        } else {
+          callback("Error while truncating file");
+        }
+      });
+    }
+  );
+};
+lib.delete = function(dir, file, callback) {
+  fs.unlink(lib.baseDir + dir + "/" + file + ".json", err => {
+    if (!err) {
+      callback(false);
+    } else {
+      callback("Error while deleting the file.");
+    }
+  });
+};
 
 module.exports = lib;
