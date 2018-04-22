@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const helpers = require("./helpers");
 
 let lib = {};
 lib.baseDir = path.join(__dirname, "/../.data/");
@@ -32,7 +33,12 @@ lib.create = function(dir, file, data, callback) {
 };
 lib.read = function(dir, file, callback) {
   fs.readFile(lib.baseDir + dir + "/" + file + ".json", "utf8", (err, data) => {
-    callback(err, data);
+    if (!err) {
+      let parsedData = helpers.parseJsonToObject(data);
+      callback(err, parsedData);
+    } else {
+      callback(err, data);
+    }
   });
 };
 lib.update = function(dir, file, data, callback) {
