@@ -4,6 +4,8 @@ const StringDecoder = require("string_decoder").StringDecoder;
 const config = require("./config");
 const https = require("https");
 const fs = require("fs");
+const handlers = require("./lib/handlers");
+const helpers = require("./lib/helpers");
 
 // Extract request data and call handlers to responde
 let defineServerFunctionality = function(request, response) {
@@ -33,7 +35,7 @@ let defineServerFunctionality = function(request, response) {
       headers,
       path: trimmedPath,
       queryStringObject,
-      payload: buffer
+      payload: helpers.parseJsonToObject(buffer)
     };
     choosenHandler(data, function(statusCode, payload) {
       statusCode = typeof statusCode === "number" ? statusCode : 200;
@@ -93,17 +95,8 @@ httpsServer.listen(config.httpsPort, () => {
 });
 
 // Define respopnses with handlers and a router
-let handlers = {};
-handlers.sample = function(data, callback) {
-  callback(406, { name: "Sample handler" });
-};
-handlers.ping = function(data, callback) {
-  callback(200);
-};
-handlers.notFound = function(data, callback) {
-  callback(404);
-};
 const router = {
   sample: handlers.sample,
-  ping: handlers.ping
+  ping: handlers.ping,
+  users: handlers.users
 };

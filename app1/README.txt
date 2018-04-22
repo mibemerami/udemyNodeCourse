@@ -15,3 +15,5 @@ Examples for a test:
 curl -X PUT -H 'lotti: kasi' -d 'herlitzdareck fielnam derndli alvas' http://localhost:3000/sample?helm=hut
 
 curl -k -X PUT -H 'lotti: kasi' -d 'herlitzdareck fielnam derndli alvas' https://localhost:3001/sample?helm=hut
+
+curl -X POST -H 'lotti: kasi' -d '{"firstName":"flabedi", "lastName":"flubb", "phone":"123654", "password":"sekret", "tosAgreement":"true"}' http://localhost:3000/sample?helm=hut
