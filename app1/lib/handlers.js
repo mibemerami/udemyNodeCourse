@@ -25,7 +25,24 @@ handlers.users = function(data, callback) {
 
 // Container for all the users methods
 handlers._users = {};
-handlers._users.get = function(data, callback) {};
+
+handlers._users.get = function(data, callback) {
+  let phone =
+    typeof data.queryStringObject.phone === "string" &&
+    data.queryStringObject.phone.length > 0
+      ? data.queryStringObject.phone
+      : false;
+  if (phone) {
+    _data.read("users", phone, (err, data) => {
+      if (!err) {
+        delete data.hashedPassword;
+        callback(200, data);
+      } else {
+        callback(404);
+      }
+    });
+  }
+};
 handlers._users.put = function(data, callback) {};
 handlers._users.post = function(data, callback) {
   // Check that all required fields are filled out

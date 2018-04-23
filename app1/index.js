@@ -25,11 +25,12 @@ let defineServerFunctionality = function(request, response) {
     buffer += stringDecoder.end();
 
     // Responde:
+    /// Select handler:
     let choosenHandler =
       typeof router[trimmedPath] !== "undefined"
         ? router[trimmedPath]
         : handlers.notFound;
-
+    /// Create data object for the handler-function:
     let data = {
       method,
       headers,
@@ -37,6 +38,7 @@ let defineServerFunctionality = function(request, response) {
       queryStringObject,
       payload: helpers.parseJsonToObject(buffer)
     };
+    /// Call handler:
     choosenHandler(data, function(statusCode, payload) {
       statusCode = typeof statusCode === "number" ? statusCode : 200;
       payload = typeof payload === "object" ? payload : {};
