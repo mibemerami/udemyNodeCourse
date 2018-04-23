@@ -38,7 +38,7 @@ handlers._users.get = function(data, callback) {
         delete data.hashedPassword;
         callback(200, data);
       } else {
-        callback(404);
+        callback(500, { Error: "Problem reading data." });
       }
     });
   }
@@ -108,6 +108,21 @@ handlers._users.post = function(data, callback) {
     });
   }
 };
-handlers._users.delete = function(data, callback) {};
+handlers._users.delete = function(data, callback) {
+  let phone =
+    typeof data.queryStringObject.phone === "string" &&
+    data.queryStringObject.phone.length > 0
+      ? data.queryStringObject.phone
+      : false;
+  if (phone) {
+    _data.delete("users", phone, err => {
+      if (!err) {
+        callback(200);
+      } else {
+        callback(500, { Error: "Problem deleting data." });
+      }
+    });
+  }
+};
 
 module.exports = handlers;
