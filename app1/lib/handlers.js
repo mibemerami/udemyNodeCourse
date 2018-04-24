@@ -43,7 +43,56 @@ handlers._users.get = function(data, callback) {
     });
   }
 };
-handlers._users.put = function(data, callback) {};
+handlers._users.put = function(data, callback) {
+  let phone =
+    typeof data.payload.phone === "string" &&
+    data.payload.phone.trim().length > 0
+      ? data.payload.phone.trim()
+      : false;
+  if (phone) {
+    // Request must have at least one valid value to update
+    let firstName =
+      typeof data.payload.firstName === "string" &&
+      data.payload.firstName.trim().length > 0
+        ? data.payload.firstName.trim()
+        : false;
+    let lastName =
+      typeof data.payload.lastName === "string" &&
+      data.payload.lastName.trim().length > 0
+        ? data.payload.lastName.trim()
+        : false;
+    let password =
+      typeof data.payload.password === "string" &&
+      data.payload.password.trim().length > 0
+        ? data.payload.password.trim()
+        : false;
+    if (firstName || lastName || password) {
+      // Read in the existing data
+      _data.read("users", phone, (err, userData) => {
+        if (!err && userData) {
+          // Replace the required fields
+          if (firstName) userData.firstName = firstName;
+          if (lastName) userData.lastName = lastName;
+          if (password) userData.hashedPassword = helpers.hash(password);
+          // Write the updated data
+          _data.update("users", phone, userData, err => {
+            if (!err) {
+              callback(200);
+            } else {
+              callback(500, { Error: "Error writing updated data." });
+            }
+          });
+        } else {
+          callback(500, { Error: "Error reading data." });
+        }
+      });
+    } else {
+      callback(400, { Error: "Missing at least one required field." });
+    }
+  } else {
+    callback(400, { Error: "A problem with the phone number occurred." });
+  }
+};
 handlers._users.post = function(data, callback) {
   // Check that all required fields are filled out
   let firstName =
