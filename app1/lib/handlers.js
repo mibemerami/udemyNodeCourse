@@ -174,4 +174,78 @@ handlers._users.delete = function(data, callback) {
   }
 };
 
+// Tokens
+handlers.tokens = function(data, callback) {
+  let validMethods = ["get", "put", "post", "delete"];
+  if (validMethods.includes(data.method)) {
+    handlers._tokens[data.method](data, callback);
+  } else {
+    callback(405);
+  }
+};
+
+// Container for all the users methods
+handlers._tokens = {};
+handlers._tokens.post = function(data, callback) {
+  // Check that all required fields are filled
+  let phone =
+    typeof data.payload.phone === "string" &&
+    data.payload.phone.trim().length > 0
+      ? data.payload.phone.trim()
+      : false;
+  let password =
+    typeof data.payload.password === "string" &&
+    data.payload.password.trim().length > 0
+      ? data.payload.password.trim()
+      : false;
+  if (phone && password) {
+    // Make sure the user exists
+    _data.read("users", phone, (err, userData) => {
+      if (!err && userData) {
+        if (userData.hashedPassword === helpers.hash(password)) {
+          let tokenId = helpers.createRandomString(20);
+          let expires = Date.now() + 1000 * 60 * 60;
+          let tokenObject = {
+            phone: phone,
+            id: tokenId,
+            expires
+          };
+          _data.create("tokens", tokenId, tokenObject, err => {
+            if (!err) {
+              callback(200, tokenObject);
+            } else {
+              callback(500, { Error: "Problem storing the token." });
+            }
+          });
+        }
+      } else {
+        // User alread exists
+        callback(400, {
+          Error: "A user with that phone number doesn't exists"
+        });
+      }
+    });
+  } else {
+    callback(400, {
+      Error: "Missing required fields."
+    });
+  }
+};
+handlers._tokens.get = function(data, callback) {
+  let id =
+    typeof data.queryStringObject.id === "string" &&
+    data.queryStringObject.id.length > 0
+      ? data.queryStringObject.id
+      : false;
+  if (id) {
+    _data.read("tokens", id, (err, data) => {
+      if (!err) {
+        callback(200, data);
+      } else {
+        callback(500, { Error: "Problem reading data." });
+      }
+    });
+  }
+};
+
 module.exports = handlers;
