@@ -247,5 +247,53 @@ handlers._tokens.get = function(data, callback) {
     });
   }
 };
+handlers._tokens.put = function(data, callback) {
+  let id =
+    typeof data.queryStringObject.id === "string" &&
+    data.queryStringObject.id.length > 0
+      ? data.queryStringObject.id
+      : false;
+  let extend =
+    typeof data.payload.extend === "boolean" ? data.payload.extend : false;
+  if (id && extend) {
+    _data.read("tokens", id, (err, tokenData) => {
+      if (!err && tokenData) {
+        tokenData.expires = Date.now() + 1000 * 60 * 60;
+        _data.update("tokens", id, tokenData, err => {
+          if (!err) {
+            callback(200, tokenData);
+          } else {
+            callback(500, { Error: "Problem storing the updated token." });
+          }
+        });
+      } else {
+        // User alread exists
+        callback(400, {
+          Error: "A token with that ID doesn't exists"
+        });
+      }
+    });
+  } else {
+    callback(400, { Error: "Missing required fields." });
+  }
+};
+handlers._tokens.delete = function(data, callback) {
+  let id =
+    typeof data.queryStringObject.id === "string" &&
+    data.queryStringObject.id.length > 0
+      ? data.queryStringObject.id
+      : false;
+  if (id) {
+    _data.delete("tokens", id, (err, data) => {
+      if (!err) {
+        callback(200, data);
+      } else {
+        callback(500, { Error: "Problem deleting data." });
+      }
+    });
+  } else {
+    callback(400, { Error: "Missing required fields." });
+  }
+};
 
 module.exports = handlers;
