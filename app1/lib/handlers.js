@@ -17,6 +17,7 @@ handlers.notFound = function(data, callback) {
 handlers.users = function(data, callback) {
   let validMethods = ["get", "put", "post", "delete"];
   if (validMethods.includes(data.method)) {
+    console.log("Method is valid, on users path.");
     handlers._users[data.method](data, callback);
   } else {
     callback(405);
@@ -33,14 +34,29 @@ handlers._users.get = function(data, callback) {
       ? data.queryStringObject.phone
       : false;
   if (phone) {
-    _data.read("users", phone, (err, data) => {
-      if (!err) {
-        delete data.hashedPassword;
-        callback(200, data);
+    // Get token from headers
+    var token =
+      typeof data.headers.token == "string" ? data.headers.token : false;
+    console.log(
+      "Verifying that the given token is valid for the phone number..."
+    );
+    handlers._tokens.verifyToken(token, phone, isValid => {
+      console.log("Verify token was: ", isValid);
+      if (isValid) {
+        _data.read("users", phone, (err, data) => {
+          if (!err) {
+            delete data.hashedPassword;
+            callback(200, data);
+          } else {
+            callback(500, { Error: "Problem reading data." });
+          }
+        });
       } else {
-        callback(500, { Error: "Problem reading data." });
+        callback(403, { Error: "Missing token or wrong token in header." });
       }
     });
+  } else {
+    callback(400, { Error: "Missing or wrong field phone in querestring." });
   }
 };
 handlers._users.put = function(data, callback) {
@@ -294,6 +310,20 @@ handlers._tokens.delete = function(data, callback) {
   } else {
     callback(400, { Error: "Missing required fields." });
   }
+};
+handlers._tokens.verifyToken = function(tokenId, phone, callback) {
+  console.log("Verifying...");
+  _data.read("tokens", tokenId, (err, tokenData) => {
+    if (!err && tokenData) {
+      if (tokenData.phone === phone && tokenData.expires > Date.now()) {
+        callback(true);
+      } else {
+        callback(false);
+      }
+    } else {
+      callback(false);
+    }
+  });
 };
 
 module.exports = handlers;

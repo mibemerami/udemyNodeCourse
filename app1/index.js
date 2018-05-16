@@ -38,6 +38,8 @@ let defineServerFunctionality = function(request, response) {
       queryStringObject,
       payload: helpers.parseJsonToObject(buffer)
     };
+    logOutStuff();
+
     /// Call handler:
     choosenHandler(data, function(statusCode, payload) {
       statusCode = typeof statusCode === "number" ? statusCode : 200;
@@ -47,8 +49,6 @@ let defineServerFunctionality = function(request, response) {
       response.writeHead(statusCode);
       response.end(payloadString);
     });
-
-    logOutStuff();
   });
 
   let logOutStuff = () => {
